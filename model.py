@@ -12,16 +12,53 @@ client = bh.new_binance_client()
 PATH = "data/"
 PROFILE = "profile.json"
 
-def update_profile(assets=None):
+def get_all_assets():
+    """
+    gets all the margin assets with messari page
+    - returns list without quote asset
+    """
+    return list(read_profile().keys())
+    
+
+def get_backtesting_df(assets=None, length=None, quote="BTC", progress=False, sleep=1):
+    """
+    gets backtesting df with closing prices of all assets in profile.
+    - assets: list of assets without quote
+    - length: limit the length of the df
+    - progress: to show progress bar or not
+    - sleep: >=0. Time to sleep before binance call
+    """
+    if assets is None: assets = get_all_assets()
+    if "BTC" in assets: assets.remove("BTC")
+    df = bdl.get_timeseries_data("BTCUSDT").close.rename("btc")
+    
+    iteration = 0
+    total = len(assets)
+    
+    for asset in assets:
+        if progress: ui.printProgressBar(iteration, total)
+        iteration += 1
+        time.sleep(sleep)
+        
+        new = bdl.get_timeseries_data(asset+quote).close.rename(asset.lower())
+        df = pd.concat([df, new], axis=1)
+        
+    ui.printProgressBar(iteration, total)
+    
+    return df
+    
+
+def update_profile(assets=None, progress=False):
     """
     updates profile given list of assets, else fetches lest of all margin available binance assets
     Takes ~10 minutes due to messari constraints
+    - progress: whether to show progress bar or not
     """
     if assets is None: assets = list(map(lambda x: x['base'], get_all_margin_assets()))
     iteration = 0
     total = len(assets)
     for asset in assets:
-        ui.printProgressBar(iteration, total)
+        if progress: ui.printProgressBar(iteration, total)
         iteration += 1
         time.sleep(3.1)
         response = requests.get(f"https://data.messari.io/api/v2/assets/{asset.lower()}/profile")

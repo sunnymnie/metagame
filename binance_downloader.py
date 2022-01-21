@@ -10,7 +10,7 @@ PATH = "data/"
 def get_timeseries_data(pair:str):
     """gets the binance past timeseries"""    
     df = update_data(pair, get_past_bars(pair))
-    df['timestamp'] = list(map(lambda x: datetime.fromtimestamp(x/1e3), df.timestamp))
+    df['timestamp'] = list(map(lambda x: datetime.utcfromtimestamp(x/1e3), df.timestamp))
     df = df.set_index('timestamp')
     return df
 
