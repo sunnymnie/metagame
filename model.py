@@ -11,6 +11,7 @@ import time
 client = bh.new_binance_client()
 PATH = "data/"
 PROFILE = "profile.json"
+BACKTESTING = "backtesting.csv"
 
 def get_all_assets():
     """
@@ -20,7 +21,7 @@ def get_all_assets():
     return list(read_profile().keys())
     
 
-def get_backtesting_df(assets=None, length=None, quote="BTC", progress=False, sleep=1):
+def get_backtesting_df(assets=None, length=None, quote="USDT", progress=False, sleep=0.5):
     """
     gets backtesting df with closing prices of all assets in profile.
     - assets: list of assets without quote
@@ -30,7 +31,7 @@ def get_backtesting_df(assets=None, length=None, quote="BTC", progress=False, sl
     """
     if assets is None: assets = get_all_assets()
     if "BTC" in assets: assets.remove("BTC")
-    df = bdl.get_timeseries_data("BTCUSDT").close.rename("btc")
+    df = bdl.get_timeseries_data("BTCUSDT").close.rename("btc").to_frame()
     
     iteration = 0
     total = len(assets)
@@ -40,10 +41,15 @@ def get_backtesting_df(assets=None, length=None, quote="BTC", progress=False, sl
         iteration += 1
         time.sleep(sleep)
         
-        new = bdl.get_timeseries_data(asset+quote).close.rename(asset.lower())
-        df = pd.concat([df, new], axis=1)
-        
+        try:
+            new = (bdl.get_timeseries_data(asset+quote).close/df.btc).rename(asset.lower())
+            df = pd.concat([df, new], axis=1)
+        except:
+            print(f"Warning: No symbol exists: {asset+quote}")
+                    
     ui.printProgressBar(iteration, total)
+    
+    df.to_csv(PATH+BACKTESTING)
     
     return df
     
@@ -91,7 +97,7 @@ def save_profile(profile):
 
 
 
-def get_all_margin_assets(quote="BTC"):
+def get_all_margin_assets(quote="USDT"):
     """gets all margin-trable assets on binance"""
     all_assets = client.get_all_isolated_margin_symbols()
     all_assets = list(filter(lambda x: x['quote']==quote, all_assets))
