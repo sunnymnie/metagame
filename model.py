@@ -18,16 +18,33 @@ def get_all_assets():
     gets all the margin assets with messari page
     - returns list without quote asset
     """
-    return list(read_profile().keys())
+    # orig = list(read_profile().keys())
+    # return orig
     
+    # account=client.get_margin_account()
+    # account = list(map(lambda x: x['asset'], account['userAssets']))
+    # return account
+    
+    all_assets = client.get_all_isolated_margin_symbols()
+    all_assets = list(filter(lambda x: x['quote']=="USDT", all_assets))
+    all_assets = list(filter(lambda x: x['isMarginTrade']==True, all_assets))
+    all_assets = list(map(lambda x: x['base'], all_assets))
+    return all_assets
 
-def get_backtesting_df(assets=None, length=None, quote="USDT", progress=False, sleep=0.5):
+    # return list(filter(lambda x: x not in , a))
+def get_must_be_in_assets():
+    account=client.get_margin_account()
+    account = list(map(lambda x: x['asset'], account['userAssets']))
+    return account
+
+def get_backtesting_df(assets=None, length=None, quote="USDT", progress=False, sleep=0.5, save=True):
     """
     gets backtesting df with closing prices of all assets in profile.
     - assets: list of assets without quote
     - length: limit the length of the df
     - progress: to show progress bar or not
     - sleep: >=0. Time to sleep before binance call
+    - save: whether to save the df
     """
     if assets is None: assets = get_all_assets()
     if "BTC" in assets: assets.remove("BTC")
@@ -42,14 +59,15 @@ def get_backtesting_df(assets=None, length=None, quote="USDT", progress=False, s
         time.sleep(sleep)
         
         try:
-            new = (bdl.get_timeseries_data(asset+quote).close/df.btc).rename(asset.lower())
+            new = (bdl.get_timeseries_data(asset+quote)['close']/df.btc).rename(asset.lower())
+            # new = bdl.get_timeseries_data(asset+quote)['close'].rename(asset.lower())
             df = pd.concat([df, new], axis=1)
         except:
             print(f"Warning: No symbol exists: {asset+quote}")
                     
     ui.printProgressBar(iteration, total)
     
-    df.to_csv(PATH+BACKTESTING)
+    if save: df.to_csv(PATH+BACKTESTING)
     
     return df
     
