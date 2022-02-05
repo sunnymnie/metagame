@@ -44,10 +44,10 @@ def trade_amt(client, asset:str, total:float, precision:float, base="USDT"):
     p = get_price(client, asset + base)
     return binance_floor(total/p, precision)
 
-def new_binance_client():
+def new_binance_client(path=""):
     """resets the client to prevent 'read operation timed out'"""
 
-    return Client(api_key=key("binance", "api"), api_secret=key("binance", "secret"))
+    return Client(api_key=key("binance", "api", path), api_secret=key("binance", "secret", path))
 
 def get_usdt_balance(client):
     """returns the USDT balance in spot as float"""

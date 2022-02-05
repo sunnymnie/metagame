@@ -59,8 +59,8 @@ def get_backtesting_df(assets=None, length=None, quote="USDT", progress=False, s
         time.sleep(sleep)
         
         try:
-            new = (bdl.get_timeseries_data(asset+quote)['close']/df.btc).rename(asset.lower())
-            # new = bdl.get_timeseries_data(asset+quote)['close'].rename(asset.lower())
+            # new = (bdl.get_timeseries_data(asset+quote)['close']/df.btc).rename(asset.lower())
+            new = bdl.get_timeseries_data(asset+quote)['close'].rename(asset.lower())
             df = pd.concat([df, new], axis=1)
         except:
             print(f"Warning: No symbol exists: {asset+quote}")
