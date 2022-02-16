@@ -27,7 +27,7 @@ class Downloader:
 
         df = df_past if past else self.update_data(pair, df_past, span, full)
         if timeindex:
-            df['timestamp'] = list(map(lambda x: datetime.fromtimestamp(x/1e3), df.timestamp))
+            df['timestamp'] = list(map(lambda x: datetime.utcfromtimestamp(x/1e3), df.timestamp))
             df = df.set_index('timestamp')
             return df
         return df
