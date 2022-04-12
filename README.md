@@ -2,7 +2,9 @@
 Purpose is the same: finding the meta
 
 ## Strat general idea
-Go long after pump for large caps during 'bull bursts'
+- Go long after pump for large caps during 'bull bursts'. 
+- OR Buy when listed on binance?
+- OR focus on jus ETH or BTC, but only trade after gaining/losing 5% in past 5 hours for countertrend, or current price to low of 5 hours, etc. 
 
 ### Define 'bull burst'
 - past btc/eth price
