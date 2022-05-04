@@ -1,6 +1,7 @@
 # Sensitive info + large files
 **/api-keys
 **/data
+**/keys.json
 
 # Vim swap files
 *.swp
